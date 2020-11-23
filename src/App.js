@@ -1,20 +1,23 @@
+import { BrowserRouter as Router } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
-import Header from './components/Header';
+import Navigation from './components/Navigation';
 import Main from './components/Main';
 import Footer from './components/Footer';
 
 const App = () => {
   return (
-    <Box
-      textAlign="center"
-      display="flex"
-      flexDirection="column"
-      minHeight="100vh"
-      position="relative">
-      <Header />
-      <Main />
-      <Footer />
-    </Box>
+    <Router>
+      <Box
+        textAlign="center"
+        display="flex"
+        flexDirection="column"
+        minHeight="100vh"
+        position="relative">
+        <Navigation />
+        <Main />
+        <Footer />
+      </Box>
+    </Router>
   );
 };
 
