@@ -9,7 +9,7 @@ const Footer = () => {
         href="https://github.com/DianaMukaliyeva"
         rel="noreferrer"
         target="_blank">
-        <i class="fab fa-github fa-lg"></i>
+        <i className="fab fa-github fa-lg"></i>
         <Typography component="span"> Diana Mukaliyeva</Typography>
       </Link>
       <Typography component="div">Reaktor assignment for Junior Developer, Spring 2021</Typography>
