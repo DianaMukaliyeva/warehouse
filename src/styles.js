@@ -10,6 +10,7 @@ export const useStyles = makeStyles(
     },
     paper: {
       width: '100%',
+      marginTop: theme.spacing(3),
       marginBottom: theme.spacing(2),
     },
     container: {

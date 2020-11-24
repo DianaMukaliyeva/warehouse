@@ -10,12 +10,14 @@ const Navigation = () => {
 
   return (
     <AppBar color="inherit" position="sticky">
-      <Box bgcolor="wheat">
+      <Box bgcolor="midnightblue">
         <Toolbar>
           <Link className={classes.textDecorNone} to="/">
-            <IconButton edge="start">
+            <IconButton color="secondary" edge="start">
               <AccountBalanceIcon />
-              <Box pl={1}>Warehouse</Box>
+              <Box color="white" pl={1}>
+                Warehouse
+              </Box>
             </IconButton>
           </Link>
         </Toolbar>

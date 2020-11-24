@@ -24,7 +24,7 @@ const CustomTabs = () => {
   return (
     <Container>
       <Box display="flex" justifyContent="center">
-        <Tabs variant="scrollable" scrollButtons="on" value={tab}>
+        <Tabs variant="scrollable" indicatorColor="primary" scrollButtons="on" value={tab}>
           <Tab className={classes.hidden} label="hidden" value="/" />
           {tabs.map((item) => (
             <Tab
