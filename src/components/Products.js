@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { lighten, makeStyles } from '@material-ui/core/styles';
-import { Box } from '@material-ui/core';
+import axios from 'axios';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -17,29 +16,9 @@ import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import { data } from '../categories.json';
-import TableList from './TableList';
 import { useStyles } from '../styles';
-
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Donut', 452, 25.0, 51, 4.9),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-  createData('Honeycomb', 408, 3.2, 87, 6.5),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Jelly Bean', 375, 0.0, 94, 0.0),
-  createData('KitKat', 518, 26.0, 65, 7.0),
-  createData('Lollipop', 392, 0.2, 98, 0.0),
-  createData('Marshmallow', 318, 0, 81, 2.0),
-  createData('Nougat', 360, 19.0, 9, 37.0),
-  createData('Oreo', 437, 18.0, 63, 4.0),
-];
+import services from '../services/badApiService';
+import categories from '../categories';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -68,11 +47,11 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-  { id: 'name', numeric: false, disablePadding: false, label: 'Dessert (100g serving)' },
-  { id: 'calories', numeric: true, disablePadding: false, label: 'Calories' },
-  { id: 'fat', numeric: true, disablePadding: false, label: 'Fat (g)' },
-  { id: 'carbs', numeric: true, disablePadding: false, label: 'Carbs (g)' },
-  { id: 'protein', numeric: true, disablePadding: false, label: 'Protein (g)' },
+  { id: 'name', label: 'Name' },
+  { id: 'color', label: 'Color' },
+  { id: 'manufacturer', label: 'Manufacturer' },
+  { id: 'price', label: 'Price' },
+  { id: 'availability', label: 'Availability' },
 ];
 
 function EnhancedTableHead(props) {
@@ -87,8 +66,7 @@ function EnhancedTableHead(props) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'default'}
+            align="left"
             sortDirection={orderBy === headCell.id ? order : false}>
             <TableSortLabel
               active={orderBy === headCell.id}
@@ -114,15 +92,8 @@ EnhancedTableHead.propTypes = {
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
   orderBy: PropTypes.string.isRequired,
 };
-
-const useToolbarStyles = makeStyles((theme) => ({
-  title: {
-    flex: '1 1 100%',
-  },
-}));
-
 const EnhancedTableToolbar = () => {
-  const classes = useToolbarStyles();
+  const classes = useStyles();
 
   return (
     <Toolbar>
@@ -145,11 +116,104 @@ const Products = () => {
   const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState('');
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  // const [rows, setRows] = React.useState([]);
+  const [products, setProducts] = React.useState({});
+  // const [status, setStatus] = React.useState('Loading...');
+  const [complex, setComplex] = React.useState({
+    status: 'Loading...',
+    rows: [],
+    products: {},
+    manufacturers: [],
+    availability: [],
+  });
+  const [manufacturers, setManufacturers] = React.useState([]);
+  const [availabilityInfo, setAvailabilityInfo] = React.useState([]);
 
-  if (!data.some((e) => e.product === product)) {
-    return <Box p={3}>No such category</Box>;
-  }
+  useEffect(() => {
+    console.log('use1');
+
+    const fetchProducts = async () => {
+      if (!categories.some((e) => e.product === product)) {
+        setComplex({ ...complex, status: 'No such category' });
+        // setStatus('No such category');
+      }
+      let allProducts = {};
+      let allManufacturers = new Set();
+      let rows = [];
+      for (const category of categories) {
+        try {
+          const res = await axios.get(
+            `https://bad-api-assignment.reaktor.com/products/${category.product}`
+          );
+          allProducts[category.product] = res.data;
+          let tempManufacturers = new Set(res.data.map((item) => item.manufacturer));
+          allManufacturers = new Set([...allManufacturers, ...tempManufacturers]);
+          if (product === category.product) {
+            rows = res.data;
+            // setStatus('');
+            // setRows(res.data);
+          }
+        } catch (err) {
+          if (err.response && err.response.status === 404) {
+            setComplex({ ...complex, status: 'No such category' });
+            // setStatus('No such category');
+          } else {
+            setComplex({ ...complex, status: 'Refresh the page' });
+            // setStatus('Refresh the page');
+          }
+        }
+      }
+      setComplex({
+        ...complex,
+        status: '',
+        rows: rows,
+        products: allProducts,
+        manufacturers: allManufacturers,
+      });
+      // setProducts(allProducts);
+      // setManufacturers(allManufacturers);
+    };
+
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    console.log('use 2');
+    if (complex.products[[product]]) {
+      console.log('in use 2');
+      setComplex({ ...complex, rows: complex.products[[product]] });
+      // setStatus('');
+      // setRows(products[[product]]);
+    }
+    //get the latest information
+  }, [product]);
+
+  // useEffect(() => {
+  //   console.log('use eff');
+  //   const fetchAvailability = async () => {
+  //     const resultAvailability = await services.getAvailability(manufacturers);
+  //     console.log('resutl ava', resultAvailability);
+  //     setAvailabilityInfo(resultAvailability);
+  //     let newRows = [...rows];
+  //     if (resultAvailability.length > 0) {
+  //       newRows = newRows.map((item) => {
+  //         let newItem = { ...item };
+  //         let found = resultAvailability.find((el) => el.id.toLowerCase() === item.id);
+  //         newItem.availability = found.DATAPAYLOAD;
+  //         return newItem;
+  //       });
+  //       setRows(newRows);
+  //     }
+  //   };
+  //   fetchAvailability();
+  //   console.log(
+  //     'after',
+  //     rows.filter((f) => f.name === 'EWHHOP ROOM')
+  //   );
+  // }, [manufacturers]);
+
+  console.log('rerender', complex.rows.length);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -170,61 +234,68 @@ const Products = () => {
     setPage(0);
   };
 
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+  const emptyRows = rowsPerPage - Math.min(rowsPerPage, complex.rows.length - page * rowsPerPage);
 
   return (
-    <div>
-      <Paper className={classes.paper}>
-        <EnhancedTableToolbar />
-        <TableContainer className={classes.container}>
-          <Table stickyHeader className={classes.table} aria-labelledby="tableTitle" size="small">
-            <EnhancedTableHead
-              classes={classes}
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
-            />
-            <TableBody>
-              {stableSort(rows, getComparator(order, orderBy))
+    <Paper className={classes.paper}>
+      <EnhancedTableToolbar />
+      <TableContainer className={classes.container}>
+        <Table stickyHeader className={classes.table} size="small">
+          <EnhancedTableHead
+            classes={classes}
+            order={order}
+            orderBy={orderBy}
+            onRequestSort={handleRequestSort}
+          />
+          <TableBody>
+            {complex.status ? (
+              <TableRow className={classes.rowHeight}>
+                <TableCell align="center" colSpan={5}>
+                  {complex.status}
+                </TableCell>
+              </TableRow>
+            ) : (
+              stableSort(complex.rows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => {
                   return (
                     <TableRow
                       hover
-                      onClick={() => handleClick(row.name)}
+                      onClick={() => handleClick(row.id)}
                       tabIndex={-1}
-                      key={row.name}
-                      selected={selected === row.name}>
-                      <TableCell component="th" scope="row">
+                      key={row.id}
+                      selected={selected === row.id}>
+                      <TableCell width="30%" component="th" scope="row">
                         {row.name}
                       </TableCell>
-                      <TableCell align="right">{row.calories}</TableCell>
-                      <TableCell align="right">{row.fat}</TableCell>
-                      <TableCell align="right">{row.carbs}</TableCell>
-                      <TableCell align="right">{row.protein}</TableCell>
+                      <TableCell width="20%">{row.color.sort().join(', ')}</TableCell>
+                      <TableCell width="20%">{row.manufacturer}</TableCell>
+                      <TableCell width="10%">{row.price}</TableCell>
+                      <TableCell width="20%">
+                        {row.availability ? row.availability : 'loading...'}
+                      </TableCell>
                     </TableRow>
                   );
-                })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 33 * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
-      </Paper>
-    </div>
+                })
+            )}
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 33 * emptyRows }}>
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[25, 50, 100, 250]}
+        component="div"
+        count={complex.rows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
+    </Paper>
   );
 };
-
 export default Products;
