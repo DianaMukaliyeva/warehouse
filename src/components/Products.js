@@ -113,34 +113,24 @@ const Products = () => {
   const classes = useStyles();
   const { product } = useParams();
   const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
+  const [orderBy, setOrderBy] = React.useState('availability');
   const [selected, setSelected] = React.useState('');
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
-  // const [rows, setRows] = React.useState([]);
+  const [tableData, setTableData] = React.useState({ status: 'Loading...', data: [] });
   const [products, setProducts] = React.useState({});
-  // const [status, setStatus] = React.useState('Loading...');
-  const [complex, setComplex] = React.useState({
-    status: 'Loading...',
-    rows: [],
-    products: {},
-    manufacturers: [],
-    availability: [],
-  });
   const [manufacturers, setManufacturers] = React.useState([]);
-  const [availabilityInfo, setAvailabilityInfo] = React.useState([]);
+  const [availabilityInfo, setAvailabilityInfo] = React.useState({});
 
   useEffect(() => {
-    console.log('use1');
-
+    console.log('use 1');
     const fetchProducts = async () => {
+      console.log('fetch products');
       if (!categories.some((e) => e.product === product)) {
-        setComplex({ ...complex, status: 'No such category' });
-        // setStatus('No such category');
+        setTableData({ ...tableData, status: 'No such category' });
       }
       let allProducts = {};
       let allManufacturers = new Set();
-      let rows = [];
       for (const category of categories) {
         try {
           const res = await axios.get(
@@ -150,29 +140,18 @@ const Products = () => {
           let tempManufacturers = new Set(res.data.map((item) => item.manufacturer));
           allManufacturers = new Set([...allManufacturers, ...tempManufacturers]);
           if (product === category.product) {
-            rows = res.data;
-            // setStatus('');
-            // setRows(res.data);
+            setTableData({ status: '', data: res.data });
           }
         } catch (err) {
           if (err.response && err.response.status === 404) {
-            setComplex({ ...complex, status: 'No such category' });
-            // setStatus('No such category');
+            setTableData({ ...tableData, status: 'No such category' });
           } else {
-            setComplex({ ...complex, status: 'Refresh the page' });
-            // setStatus('Refresh the page');
+            setTableData({ ...tableData, status: 'Refresh the page or try later. Server is down' });
           }
         }
       }
-      setComplex({
-        ...complex,
-        status: '',
-        rows: rows,
-        products: allProducts,
-        manufacturers: allManufacturers,
-      });
-      // setProducts(allProducts);
-      // setManufacturers(allManufacturers);
+      setProducts(allProducts);
+      setManufacturers([...allManufacturers]);
     };
 
     fetchProducts();
@@ -180,40 +159,64 @@ const Products = () => {
 
   useEffect(() => {
     console.log('use 2');
-    if (complex.products[[product]]) {
-      console.log('in use 2');
-      setComplex({ ...complex, rows: complex.products[[product]] });
-      // setStatus('');
-      // setRows(products[[product]]);
+    const getStock = (description) => {
+      if (description.includes('OUTOFSTOCK')) return 'out of stock';
+      if (description.includes('LESSTHAN10')) return 'less than 10';
+      return 'in stock';
+    };
+    const fetchAvailability = async () => {
+      console.log('fetch availability');
+      let allAvailability = {};
+      let attempts = 0;
+      for (let i = 0; i < manufacturers.length; i++) {
+        try {
+          const res = await axios.get(
+            `https://bad-api-assignment.reaktor.com/availability/${manufacturers[i]}`
+          );
+          if (res.data && res.data.response && res.data.response !== '[]') {
+            res.data.response.forEach(
+              (info) => (allAvailability[[info.id.toLowerCase()]] = getStock(info.DATAPAYLOAD))
+            );
+          } else if (res.data.response === '[]' && attempts < 10) {
+            i--;
+            attempts++;
+          }
+          console.log('availability from ', manufacturers[i]);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      setAvailabilityInfo(allAvailability);
+    };
+    fetchAvailability();
+  }, [manufacturers]);
+
+  useEffect(() => {
+    console.log('use 3');
+    if (products[[product]]) {
+      console.log('if products fetched set table');
+      setTableData({ status: '', data: products[[product]] });
     }
-    //get the latest information
+    const updateInformation = async () => {
+      console.log('update information');
+      try {
+        const res = await axios.get(`https://bad-api-assignment.reaktor.com/products/${product}`);
+        setProducts({ ...products, [product]: res.data });
+        let tempManufacturers = new Set(res.data.map((item) => item.manufacturer));
+        setManufacturers([...tempManufacturers]);
+        console.log('information updated');
+      } catch (err) {
+        if (err.response && err.response.status === 404) {
+          setTableData({ ...tableData, status: 'No such category' });
+        } else {
+          setTableData({ ...tableData, status: 'Refresh the page or try later. Server is down' });
+        }
+      }
+    };
+    updateInformation();
   }, [product]);
 
-  // useEffect(() => {
-  //   console.log('use eff');
-  //   const fetchAvailability = async () => {
-  //     const resultAvailability = await services.getAvailability(manufacturers);
-  //     console.log('resutl ava', resultAvailability);
-  //     setAvailabilityInfo(resultAvailability);
-  //     let newRows = [...rows];
-  //     if (resultAvailability.length > 0) {
-  //       newRows = newRows.map((item) => {
-  //         let newItem = { ...item };
-  //         let found = resultAvailability.find((el) => el.id.toLowerCase() === item.id);
-  //         newItem.availability = found.DATAPAYLOAD;
-  //         return newItem;
-  //       });
-  //       setRows(newRows);
-  //     }
-  //   };
-  //   fetchAvailability();
-  //   console.log(
-  //     'after',
-  //     rows.filter((f) => f.name === 'EWHHOP ROOM')
-  //   );
-  // }, [manufacturers]);
-
-  console.log('rerender', complex.rows.length);
+  console.log('rerender', tableData.data.length);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -234,7 +237,7 @@ const Products = () => {
     setPage(0);
   };
 
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, complex.rows.length - page * rowsPerPage);
+  const emptyRows = rowsPerPage - Math.min(rowsPerPage, tableData.data.length - page * rowsPerPage);
 
   return (
     <Paper className={classes.paper}>
@@ -248,14 +251,14 @@ const Products = () => {
             onRequestSort={handleRequestSort}
           />
           <TableBody>
-            {complex.status ? (
+            {tableData.status ? (
               <TableRow className={classes.rowHeight}>
                 <TableCell align="center" colSpan={5}>
-                  {complex.status}
+                  {tableData.status}
                 </TableCell>
               </TableRow>
             ) : (
-              stableSort(complex.rows, getComparator(order, orderBy))
+              stableSort(tableData.data, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => {
                   return (
@@ -272,7 +275,7 @@ const Products = () => {
                       <TableCell width="20%">{row.manufacturer}</TableCell>
                       <TableCell width="10%">{row.price}</TableCell>
                       <TableCell width="20%">
-                        {row.availability ? row.availability : 'loading...'}
+                        {availabilityInfo[row.id] ? availabilityInfo[row.id] : 'loading...'}
                       </TableCell>
                     </TableRow>
                   );
@@ -289,7 +292,7 @@ const Products = () => {
       <TablePagination
         rowsPerPageOptions={[25, 50, 100, 250]}
         component="div"
-        count={complex.rows.length}
+        count={tableData.data.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={handleChangePage}
