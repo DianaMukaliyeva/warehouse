@@ -16,9 +16,6 @@ export const useStyles = makeStyles(
     container: {
       maxHeight: '60vh',
     },
-    title: {
-      flex: '0 1 100%',
-    },
     rowHeight: {
       height: 500,
     },

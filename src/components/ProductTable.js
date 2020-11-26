@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Paper, TablePagination } from '@material-ui/core';
-import TableFilter from './TableFilter';
+import TableToolbar from './TableToolbar';
 import TableData from './TableData';
-import services from '../services/badApiService';
-import categories from '../categories';
+import { useField } from '../hooks';
 import { getStockDescription } from '../utils/helper';
 import { useStyles } from '../styles';
-import { useField } from '../hooks';
+import services from '../services/badApiService';
+import categories from '../categories';
 
 const ProductTable = () => {
   const classes = useStyles();
@@ -18,27 +18,16 @@ const ProductTable = () => {
   const [availabilityInfo, setAvailabilityInfo] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
-  const nameFilter = useField('text');
-  const manufacturerFilter = useField('text');
-  const colorFilter = useField('text');
-  const priceFilter = useField('number');
-  const [filter, setFilter] = useState({
-    open: false,
-    nameFilter: '',
-    manufacturerFilter: '',
-    priceFilter: '',
-  });
+  const nameFilter = useField('search');
+  const manufacturerFilter = useField('search');
+  const colorFilter = useField('search');
 
   const filterRows = (rows) => {
-    return rows.filter((item) =>
-      priceFilter.value !== ''
-        ? item.price === Number(priceFilter.value) &&
-          item.name.toLowerCase().includes(nameFilter.value.toLowerCase()) &&
-          item.color.join('').toLowerCase().includes(colorFilter.value.toLowerCase()) &&
-          item.manufacturer.includes(manufacturerFilter.value.toLowerCase())
-        : item.name.toLowerCase().includes(nameFilter.value.toLowerCase()) &&
-          item.color.join('').toLowerCase().includes(colorFilter.value.toLowerCase()) &&
-          item.manufacturer.includes(manufacturerFilter.value.toLowerCase())
+    return rows.filter(
+      (item) =>
+        item.name.toLowerCase().includes(nameFilter.value.toLowerCase()) &&
+        item.color.join('').toLowerCase().includes(colorFilter.value.toLowerCase()) &&
+        item.manufacturer.includes(manufacturerFilter.value.toLowerCase())
     );
   };
 
@@ -121,7 +110,7 @@ const ProductTable = () => {
       setTableData({ ...tableData, rows: filterRows(rowsTemp) });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nameFilter.value, manufacturerFilter.value, priceFilter.value, colorFilter.value]);
+  }, [nameFilter.value, manufacturerFilter.value, colorFilter.value]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -134,13 +123,10 @@ const ProductTable = () => {
 
   return (
     <Paper className={classes.paper}>
-      <TableFilter
-        manufacturerFilter={manufacturerFilter}
-        priceFilter={priceFilter}
-        nameFilter={nameFilter}
+      <TableToolbar
         colorFilter={colorFilter}
-        filter={filter}
-        setFilter={setFilter}
+        manufacturerFilter={manufacturerFilter}
+        nameFilter={nameFilter}
       />
       <TableData
         availabilityInfo={availabilityInfo}
