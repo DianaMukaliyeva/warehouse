@@ -1,9 +1,9 @@
 import { Switch, Route } from 'react-router-dom';
 import { Box, Container } from '@material-ui/core';
-import Products from './Products';
+import Products from './ProductTable';
 import Home from './Home';
 
-const Main = () => {
+const Routes = () => {
   return (
     <Box flexGrow={1}>
       <Container>
@@ -17,4 +17,4 @@ const Main = () => {
   );
 };
 
-export default Main;
+export default Routes;

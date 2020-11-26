@@ -36,6 +36,9 @@ export const useStyles = makeStyles(
       top: 20,
       width: 1,
     },
+    ml20: {
+      marginLeft: '20px',
+    },
   }),
   { index: 1 }
 );

@@ -1,7 +1,7 @@
 import { BrowserRouter as Router } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import Navigation from './Navigation';
-import Main from './Main';
+import Routes from './Routes';
 import Footer from './Footer';
 
 const App = () => {
@@ -14,7 +14,7 @@ const App = () => {
         minHeight="100vh"
         position="relative">
         <Navigation />
-        <Main />
+        <Routes />
         <Footer />
       </Box>
     </Router>

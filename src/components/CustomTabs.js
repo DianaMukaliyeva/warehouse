@@ -2,12 +2,12 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Box, Tabs, Tab, Container } from '@material-ui/core';
 import { useStyles } from '../styles';
-import data from '../categories';
+import categories from '../categories';
 
 const CustomTabs = () => {
   const location = useLocation();
   const classes = useStyles();
-  const tabs = data.map((item) => {
+  const tabs = categories.map((item) => {
     let newObject = {};
     newObject['index'] = item.id;
     newObject['path'] = `/category/${item.product}`;
