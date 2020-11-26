@@ -10,7 +10,7 @@ const Main = () => {
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/category/:product" component={Products} />
-          <Route render={() => <div>Page not found</div>} />
+          <Route render={() => <Box p={3}>Page not found</Box>} />
         </Switch>
       </Container>
     </Box>
