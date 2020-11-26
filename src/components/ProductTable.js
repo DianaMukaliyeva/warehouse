@@ -7,8 +7,9 @@ import services from '../services/badApiService';
 import categories from '../categories';
 import { getStockDescription } from '../utils/helper';
 import { useStyles } from '../styles';
+import { useField } from '../hooks';
 
-const Products = () => {
+const ProductTable = () => {
   const classes = useStyles();
   const { product } = useParams();
   const [tableData, setTableData] = useState({ status: 'Loading...', rows: [] });
@@ -17,6 +18,29 @@ const Products = () => {
   const [availabilityInfo, setAvailabilityInfo] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
+  const nameFilter = useField('text');
+  const manufacturerFilter = useField('text');
+  const colorFilter = useField('text');
+  const priceFilter = useField('number');
+  const [filter, setFilter] = useState({
+    open: false,
+    nameFilter: '',
+    manufacturerFilter: '',
+    priceFilter: '',
+  });
+
+  const filterRows = (rows) => {
+    return rows.filter((item) =>
+      priceFilter.value !== ''
+        ? item.price === Number(priceFilter.value) &&
+          item.name.toLowerCase().includes(nameFilter.value.toLowerCase()) &&
+          item.color.join('').toLowerCase().includes(colorFilter.value.toLowerCase()) &&
+          item.manufacturer.includes(manufacturerFilter.value.toLowerCase())
+        : item.name.toLowerCase().includes(nameFilter.value.toLowerCase()) &&
+          item.color.join('').toLowerCase().includes(colorFilter.value.toLowerCase()) &&
+          item.manufacturer.includes(manufacturerFilter.value.toLowerCase())
+    );
+  };
 
   useEffect(() => {
     const getAllProductsAndManufacturers = async () => {
@@ -85,11 +109,19 @@ const Products = () => {
     };
 
     if (products[[product]]) {
-      setTableData({ status: '', rows: products[[product]] });
+      setTableData({ status: '', rows: filterRows(products[[product]]) });
     }
 
     updateInformation();
   }, [product]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (products[[product]]) {
+      let rowsTemp = products[[product]];
+      setTableData({ ...tableData, rows: filterRows(rowsTemp) });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nameFilter.value, manufacturerFilter.value, priceFilter.value, colorFilter.value]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -102,7 +134,14 @@ const Products = () => {
 
   return (
     <Paper className={classes.paper}>
-      <TableFilter />
+      <TableFilter
+        manufacturerFilter={manufacturerFilter}
+        priceFilter={priceFilter}
+        nameFilter={nameFilter}
+        colorFilter={colorFilter}
+        filter={filter}
+        setFilter={setFilter}
+      />
       <TableData
         availabilityInfo={availabilityInfo}
         tableData={tableData}
@@ -122,4 +161,4 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default ProductTable;

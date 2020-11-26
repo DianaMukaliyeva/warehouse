@@ -1,8 +1,8 @@
 import { BrowserRouter as Router } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
-import Navigation from './Navigation';
-import Routes from './Routes';
-import Footer from './Footer';
+import Navigation from './components/Navigation';
+import Routes from './components/Routes';
+import Footer from './components/Footer';
 
 const App = () => {
   return (

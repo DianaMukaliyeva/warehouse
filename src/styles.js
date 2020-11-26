@@ -17,7 +17,7 @@ export const useStyles = makeStyles(
       maxHeight: '60vh',
     },
     title: {
-      flex: '1 1 100%',
+      flex: '0 1 100%',
     },
     rowHeight: {
       height: 500,
