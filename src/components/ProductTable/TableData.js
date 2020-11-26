@@ -7,8 +7,8 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableRow from '@material-ui/core/TableRow';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import TableHeader from './TableHeader';
-import { stableSort, getComparator } from '../utils/helper';
-import { useStyles } from '../styles';
+import { stableSort, getComparator } from '../../utils/helper';
+import { useStyles } from '../../styles';
 
 const TableData = (props) => {
   const { availabilityInfo, tableData, page, rowsPerPage } = props;

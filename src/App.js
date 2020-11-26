@@ -1,8 +1,6 @@
-import { BrowserRouter as Router } from 'react-router-dom';
-import Box from '@material-ui/core/Box';
-import Navigation from './components/Navigation';
-import Routes from './components/Routes';
-import Footer from './components/Footer';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { Box, Container } from '@material-ui/core';
+import { Navigation, Home, ProductTable, Footer } from './components';
 
 const App = () => {
   return (
@@ -14,7 +12,15 @@ const App = () => {
         minHeight="100vh"
         position="relative">
         <Navigation />
-        <Routes />
+        <Box flexGrow={1}>
+          <Container>
+            <Switch>
+              <Route exact path="/" component={Home} />
+              <Route exact path="/category/:product" component={ProductTable} />
+              <Route render={() => <Box p={3}>Page not found</Box>} />
+            </Switch>
+          </Container>
+        </Box>
         <Footer />
       </Box>
     </Router>

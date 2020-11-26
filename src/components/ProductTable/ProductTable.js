@@ -3,11 +3,11 @@ import { useParams } from 'react-router-dom';
 import { Paper, TablePagination } from '@material-ui/core';
 import TableToolbar from './TableToolbar';
 import TableData from './TableData';
-import { useField } from '../hooks';
-import { getStockDescription } from '../utils/helper';
-import { useStyles } from '../styles';
-import services from '../services/badApiService';
-import categories from '../categories';
+import { useField } from '../../hooks';
+import { getStockDescription } from '../../utils/helper';
+import { useStyles } from '../../styles';
+import services from '../../services/badApiService';
+import categories from '../../categories';
 
 const ProductTable = () => {
   const classes = useStyles();
