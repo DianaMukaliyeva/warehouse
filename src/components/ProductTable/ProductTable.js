@@ -27,7 +27,7 @@ const ProductTable = () => {
       (item) =>
         item.name.toLowerCase().includes(nameFilter.value.toLowerCase()) &&
         item.color.join('').toLowerCase().includes(colorFilter.value.toLowerCase()) &&
-        item.manufacturer.includes(manufacturerFilter.value.toLowerCase())
+        item.manufacturer.toLowerCase().includes(manufacturerFilter.value.toLowerCase())
     );
   };
 
@@ -68,7 +68,7 @@ const ProductTable = () => {
               (info) =>
                 (allAvailability[[info.id.toLowerCase()]] = getStockDescription(info.DATAPAYLOAD))
             );
-          } else if (data.response === '[]' && attempts < 10) {
+          } else if (data.response === '[]' && attempts < 15) {
             i--;
             attempts++;
           }
@@ -79,6 +79,9 @@ const ProductTable = () => {
       setAvailabilityInfo(allAvailability);
     };
     getAvailability();
+    setTimeout(() => {
+      getAvailability();
+    }, 1000 * 60 * 5);
   }, [manufacturers]);
 
   useEffect(() => {
@@ -108,6 +111,7 @@ const ProductTable = () => {
     if (products[[product]]) {
       let rowsTemp = products[[product]];
       setTableData({ ...tableData, rows: filterRows(rowsTemp) });
+      setPage(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nameFilter.value, manufacturerFilter.value, colorFilter.value]);

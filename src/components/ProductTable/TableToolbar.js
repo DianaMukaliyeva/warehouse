@@ -5,7 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
-import RotateLeftIcon from '@material-ui/icons/RotateLeft';
+import CloseIcon from '@material-ui/icons/Close';
 
 const TableToolbar = ({ nameFilter, manufacturerFilter, colorFilter }) => {
   const resetFilter = () => {
@@ -34,7 +34,7 @@ const TableToolbar = ({ nameFilter, manufacturerFilter, colorFilter }) => {
       </Grid>
       <Tooltip title="Reset filter">
         <IconButton onClick={resetFilter}>
-          <RotateLeftIcon />
+          <CloseIcon />
         </IconButton>
       </Tooltip>
     </Toolbar>
