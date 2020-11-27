@@ -10,6 +10,88 @@ To do their work efficiently, the warehouse workers need a fast and simple listi
 ## Technologies
 
 - React
+- Materiaul UI
+
+## Project details
+
+The app uses two different APIs, after which information combined and displayed to table.
+
+### Features
+
+- Responsive UI
+- Fast and simple navigation
+- Quick filtering products by name, color and manufacturer
+- Pagination
+- Possibility to quickly add a new category by adding category name to array in `categories.js` file
+
+### API documentation
+
+#### Endpoints
+
+**GET /products/:category**
+
+- Fetches a list of products in a given category
+- Request parameter _category_ - the name of the category product
+- Sample of the response
+
+```
+[
+  {
+    "id": "some1id",
+    "type": "category",
+    "name": "Some Name",
+    "color": [
+        "yellow",
+        "red"
+    ],
+    "price": 200,
+    "manufacturer": "manufacturer"
+  },
+  {
+    "id": "some2id",
+    "type": "category",
+    "name": "Another Name",
+    "color": [
+        "black"
+    ],
+    "price": 256,
+    "manufacturer": "manufacturer"
+  }
+]
+```
+
+**GET /availability/:manufacturer**
+
+- Fetches a list of availability of products by manufacturer
+- Request parameter _manufacturer_ - the name of the manufacturer
+- Sample of the response
+
+```
+{
+  "code": 200,
+  "response": [
+    {
+        "id": "SOME1ID",
+        "DATAPAYLOAD": "<AVAILABILITY>\n  <INSTOCKVALUE>INSTOCK</INSTOCKVALUE>\n</AVAILABILITY>"
+    },
+    {
+        "id": "SOME2ID",
+        "DATAPAYLOAD": "<AVAILABILITY>\n  <INSTOCKVALUE>OUTOFSTOCK</INSTOCKVALUE>\n</AVAILABILITY>"
+    },
+    {
+        "id": "SOME3ID",
+        "DATAPAYLOAD": "<AVAILABILITY>\n  <INSTOCKVALUE>LESSTHAN10</INSTOCKVALUE>\n</AVAILABILITY>"
+    }
+}
+```
+
+#### Error handling
+
+- One API gives some random error which we can reproduce by providing request header: `x-force-error-mode`.
+  Result of the error is responding with status code 200, but instead of array of availability information response contains string `"[]"`.
+  Error was handled by repeating request several times.
+
+- Both APIs have an internal cache of about 5 minutes. The app refreshes availability information 5 minutes after the request.
 
 ## Run locally
 
