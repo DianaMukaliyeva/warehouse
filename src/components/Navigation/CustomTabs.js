@@ -30,6 +30,7 @@ const CustomTabs = () => {
             <Tab
               key={item.index}
               label={item.name}
+              name={item.name}
               value={item.path}
               component={Link}
               to={item.path}

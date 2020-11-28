@@ -93,6 +93,12 @@ The app uses two different APIs, after which information combined and displayed 
 
 - Both APIs have an internal cache of about 5 minutes. The app refreshes availability information 5 minutes after the request.
 
+## Ways to improve
+
+- Set up server side for retrieving information from APIs. It would remove all complex logic from the frontend.
+  Also with backend, I could compare eTag headers to see if information changed by sending `If-None-Match` header with the eTag for the current version of resources.
+- Use Redux for managing data.
+
 ## Run locally
 
 - Run command `npm install` to install all dependencies

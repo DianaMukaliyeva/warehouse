@@ -9,7 +9,7 @@ const Navigation = () => {
   const classes = useStyles();
 
   return (
-    <AppBar color="inherit" position="sticky">
+    <AppBar id="navigation" color="inherit" position="sticky">
       <Box bgcolor="midnightblue">
         <Toolbar>
           <Link className={classes.textDecorNone} to="/">
