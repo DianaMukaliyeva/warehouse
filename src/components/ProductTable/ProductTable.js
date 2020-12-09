@@ -3,19 +3,13 @@ import { useParams } from 'react-router-dom';
 import { Paper, TablePagination } from '@material-ui/core';
 import TableToolbar from './TableToolbar';
 import TableData from './TableData';
-import { useField } from '../../hooks';
-import { getStockDescription } from '../../utils/helper';
+import { useField, useProductsFromApi } from '../../hooks';
 import { useStyles } from '../../styles';
-import services from '../../services/badApiService';
-import categories from '../../categories';
 
 const ProductTable = () => {
   const classes = useStyles();
   const { product } = useParams();
-  const [tableData, setTableData] = useState({ status: 'Loading...', rows: [] });
-  const [products, setProducts] = useState({});
-  const [manufacturers, setManufacturers] = useState([]);
-  const [availabilityInfo, setAvailabilityInfo] = useState({});
+  const [{ products, availabilityInfo, tableData }, setTableData] = useProductsFromApi(product);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const nameFilter = useField('search');
@@ -30,51 +24,6 @@ const ProductTable = () => {
         item.manufacturer.toLowerCase().includes(manufacturerFilter.value.toLowerCase())
     );
   };
-
-  useEffect(() => {
-    const getAllProductsAndManufacturers = async () => {
-      let allProducts = {};
-      let allManufacturers = new Set();
-      for (const category of categories) {
-        const data = await services.getProducts(category.product);
-        allProducts[category.product] = data;
-        let tempManufacturers = new Set(data.map((item) => item.manufacturer));
-        allManufacturers = new Set([...allManufacturers, ...tempManufacturers]);
-
-        if (product === category.product) {
-          setTableData({ status: '', rows: data });
-        }
-      }
-      setProducts(allProducts);
-      setManufacturers([...allManufacturers]);
-    };
-
-    getAllProductsAndManufacturers();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const getAvailability = async () => {
-      let allAvailability = {};
-      let attempts = 0;
-      for (let i = 0; i < manufacturers.length; i++) {
-        const data = await services.getAvailability(manufacturers[i]);
-        if (data && data.response && data.response !== '[]') {
-          data.response.forEach(
-            (info) =>
-              (allAvailability[[info.id.toLowerCase()]] = getStockDescription(info.DATAPAYLOAD))
-          );
-        } else if (data.response === '[]' && attempts < 15) {
-          i--;
-          attempts++;
-        }
-      }
-      setAvailabilityInfo(allAvailability);
-    };
-    getAvailability();
-    setTimeout(() => {
-      getAvailability();
-    }, 1000 * 60 * 5);
-  }, [manufacturers]);
 
   useEffect(() => {
     if (products[[product]]) {
