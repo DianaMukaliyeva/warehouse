@@ -36,17 +36,13 @@ const ProductTable = () => {
       let allProducts = {};
       let allManufacturers = new Set();
       for (const category of categories) {
-        try {
-          const data = await services.getProducts(category.product);
-          allProducts[category.product] = data;
-          let tempManufacturers = new Set(data.map((item) => item.manufacturer));
-          allManufacturers = new Set([...allManufacturers, ...tempManufacturers]);
+        const data = await services.getProducts(category.product);
+        allProducts[category.product] = data;
+        let tempManufacturers = new Set(data.map((item) => item.manufacturer));
+        allManufacturers = new Set([...allManufacturers, ...tempManufacturers]);
 
-          if (product === category.product) {
-            setTableData({ status: '', rows: data });
-          }
-        } catch (error) {
-          console.log(error);
+        if (product === category.product) {
+          setTableData({ status: '', rows: data });
         }
       }
       setProducts(allProducts);
@@ -61,19 +57,15 @@ const ProductTable = () => {
       let allAvailability = {};
       let attempts = 0;
       for (let i = 0; i < manufacturers.length; i++) {
-        try {
-          const data = await services.getAvailability(manufacturers[i]);
-          if (data && data.response && data.response !== '[]') {
-            data.response.forEach(
-              (info) =>
-                (allAvailability[[info.id.toLowerCase()]] = getStockDescription(info.DATAPAYLOAD))
-            );
-          } else if (data.response === '[]' && attempts < 15) {
-            i--;
-            attempts++;
-          }
-        } catch (err) {
-          console.log(err);
+        const data = await services.getAvailability(manufacturers[i]);
+        if (data && data.response && data.response !== '[]') {
+          data.response.forEach(
+            (info) =>
+              (allAvailability[[info.id.toLowerCase()]] = getStockDescription(info.DATAPAYLOAD))
+          );
+        } else if (data.response === '[]' && attempts < 15) {
+          i--;
+          attempts++;
         }
       }
       setAvailabilityInfo(allAvailability);
@@ -85,26 +77,9 @@ const ProductTable = () => {
   }, [manufacturers]);
 
   useEffect(() => {
-    const updateInformation = async () => {
-      try {
-        const data = await services.getProducts(product);
-        setProducts({ ...products, [product]: data });
-        let tempManufacturers = new Set(data.map((item) => item.manufacturer));
-        setManufacturers([...tempManufacturers]);
-      } catch (err) {
-        if (err.response && err.response.status === 404) {
-          setTableData({ ...tableData, status: 'No such category' });
-        } else {
-          setTableData({ ...tableData, status: 'Refresh the page or try later. Server is down' });
-        }
-      }
-    };
-
     if (products[[product]]) {
       setTableData({ status: '', rows: filterRows(products[[product]]) });
     }
-
-    updateInformation();
   }, [product]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
