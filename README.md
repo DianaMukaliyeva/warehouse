@@ -1,7 +1,5 @@
 # Warehouse
 
-[Project assignment for Junior Developers at Reaktor](https://www.reaktor.com/junior-dev-assignment/).
-<br>
 The app deployed [on Heroku](https://warehouse2020.herokuapp.com/).
 
 ## Task
